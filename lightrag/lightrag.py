@@ -192,7 +192,7 @@ class LightRAG:
     chunking_func_kwargs: dict = field(default_factory=dict)
 
     def __post_init__(self):
-        log_file = os.path.join("lightrag.log")
+        log_file = os.getenv("LIGHTRAG_LOG_FILE", "lightrag.log")
         set_logger(log_file)
         logger.setLevel(self.log_level)
 
