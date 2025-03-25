@@ -588,7 +588,7 @@ async def extract_entities(
                 "content": f"{dp['entity_name']}\n{dp['description']}",
                 "source_id": dp["source_id"],
                 "metadata": {
-                    "created_at": dp.get("metadata", {}).get("created_at", time.time())
+                    "created_at": time.time()
                 },
             }
             for dp in all_entities_data
@@ -604,7 +604,7 @@ async def extract_entities(
                 "content": f"{dp['src_id']}\t{dp['tgt_id']}\n{dp['keywords']}\n{dp['description']}",
                 "source_id": dp["source_id"],
                 "metadata": {
-                    "created_at": dp.get("metadata", {}).get("created_at", time.time())
+                    "created_at": time.time()
                 },
             }
             for dp in all_relationships_data

@@ -4,6 +4,7 @@ import asyncio
 import configparser
 import os
 import warnings
+import time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from functools import partial
@@ -1018,8 +1019,29 @@ class LightRAG:
                 pipeline_status_lock=pipeline_status_lock,
                 llm_response_cache=self.llm_response_cache,
             )
+        except KeyError as ke:
+            if str(ke) == "'metadata'":
+                logger.error(f"Document missing 'metadata' field. Adding default metadata.")
+                # Try to add default metadata to the chunks if that's what's missing
+                for chunk_id, chunk_data in chunk.items():
+                    if isinstance(chunk_data, dict) and 'metadata' not in chunk_data:
+                        chunk[chunk_id]['metadata'] = {'created_at': time.time()}
+                # Try again with fixed data
+                await extract_entities(
+                    chunk,
+                    knowledge_graph_inst=self.chunk_entity_relation_graph,
+                    entity_vdb=self.entities_vdb,
+                    relationships_vdb=self.relationships_vdb,
+                    global_config=asdict(self),
+                    pipeline_status=pipeline_status,
+                    pipeline_status_lock=pipeline_status_lock,
+                    llm_response_cache=self.llm_response_cache,
+                )
+            else:
+                logger.error(f"Failed to extract entities and relationships: {ke}")
+                raise ke
         except Exception as e:
-            logger.error("Failed to extract entities and relationships")
+            logger.error(f"Failed to extract entities and relationships: {e}")
             raise e
 
     async def _insert_done(
